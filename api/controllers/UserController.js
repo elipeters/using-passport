@@ -12,8 +12,7 @@ module.exports = {
 
   login: function (req, res) {           
       req.login(req.params.all(), function(err){
-        if(err) return res.notFound(null, 'user/signup');
-//        sails.log(req.session.authenticated);
+        if(err) return res.redirect('back');
         return res.redirect('/');
       });   
   },
@@ -21,40 +20,41 @@ module.exports = {
 
   logout: function (req, res) {
     req.logout();
-//    sails.log(req.session.authenticated);
     return res.redirect('/');
   },
   
 
   signup: function (req, res) {
+    return res.view('user/signup',{msg: {info: "All fields are required"}});
+  },
+  
+  create: function (req, res) {
     var params = req.params.all();
     
-    //TODO: check if account exists - need email for password recovery
-//      sails.log("testing email :",params.email);
-    if(req.exists(params.email)){ 
-      //return to login page with error\
-      return res.badRequest('A user with that email already exists.','user/login');
-    }else{    
-      //TODO: send email verification and verify user before create
-
-      //create user with hash password, we use the given password to login
-      User.create({
-        firstname: params.firstname,
-        lastname: params.lastname,
-        username: params.username,
-        email: params.email,
-        password: req.hash(params.password)    
-      }).exec(function (err, user) {
-        if(err)return res.negotiate(err);
-
-        //login user with supplied password - nested as User.create is asynchronous
-        req.login(params, function (err){
+    //check if account exists - need email for password recovery
+    User.findOne({email: params.email}).exec(function(err,user){
+      if(user){
+        return res.view('user/signup',{msg: {error: "That email is already in use"}});
+      }else{
+        //create user with hash password, we use the given password to login
+        User.create({
+          firstname: params.firstname,
+          lastname: params.lastname,
+          username: params.username,
+          email: params.email,
+          password: req.hash(params.password)    
+        }).exec(function (err, user) {
           if(err)return res.negotiate(err);
-          req.isAuthenticated();
-          return res.view('user/account',{user: user});
-         });
-      });
-    }
+
+          //login user with supplied password - nested as User.create is asynchronous
+          req.login(params, function (err){
+            if(err)return res.negotiate(err);
+            req.isAuthenticated();
+            return res.view('user/account',{user: user});
+          });
+        });
+      }
+    });
     
   },
   
