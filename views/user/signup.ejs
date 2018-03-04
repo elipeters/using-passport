@@ -1,6 +1,21 @@
 <h1>Signup</h1>
 <form action="/signup" method="post">
-
+  <% if(msg.info){ %><p class="p-3 mb-0 text-white bg-info"><%- msg.info %></p><% } %>
+  <% if(msg.error){ %><p class="p-3 mb-0 text-white bg-danger"><%- msg.error %></p><% } %>
+  <% if(msg.success){ %><p class="p-3 mb-0 text-white bg-success"><%- msg.success %></p><% } %>
+  
+  <label for="firstname">Choose a Username</label>
+  <input name="firstname" type="text"/>
+  <br/>
+  
+  <label for="lastname">Choose a Username</label>
+  <input name="lastname" type="text"/>
+  <br/>
+  
+  <label for="email">Choose a Username</label>
+  <input name="email" type="email"/>
+  <br/>
+  
   <label for="username">Choose a Username</label>
   <input name="username" type="text"/>
   <br/>
