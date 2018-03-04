@@ -1,0 +1,20 @@
+<div class="container">
+  <div class="card bg-light mx-auto mt-3" style="max-width: 24rem;">
+    <h5 class="card-header">Account Details</h5>
+    <div class="mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Hi <%= user.firstname %> <%= user.lastname %>!</h5>
+        
+        <ul class="list-unstyled">
+          <li>Username: <%= user.username %></li>
+          <li>Email: <%= user.email %></li>    
+        </ul>
+
+        <a class="btn btn-danger" href="/">Close</a>
+        <a class="btn btn-warning" href="/logout">Log out</a>
+        <a class="my-3 btn btn-primary" href="/edit">Edit</a>
+        <a class="btn btn-primary" href="/">Home</a>
+      </div>
+    </div>
+  </div>
+</div>
