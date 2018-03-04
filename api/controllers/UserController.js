@@ -11,8 +11,9 @@ module.exports = {
 
 
   login: function (req, res) {           
-      return req.login(req.params.all(), function(err){
+      req.login(req.params.all(), function(err){
         if(err) return res.notFound(null, 'user/signup');
+//        sails.log(req.session.authenticated);
         return res.redirect('/');
       });   
   },
@@ -20,6 +21,7 @@ module.exports = {
 
   logout: function (req, res) {
     req.logout();
+//    sails.log(req.session.authenticated);
     return res.redirect('/');
   },
   
@@ -27,30 +29,33 @@ module.exports = {
   signup: function (req, res) {
     var params = req.params.all();
     
-    //TODO: check if account exists - email needs 1 email for password recovery
+    //TODO: check if account exists - need email for password recovery
+//      sails.log("testing email :",params.email);
     if(req.exists(params.email)){
+      sails.log("it's true!!!!"); 
       //return to login page with error\
       return res.badRequest('A user with that email already exists.','user/login');
-    }
-    
-    //TODO: send email verification and verify user before create
-    
-    //create user with hash password, we use the given password to login
-    User.create({
-      firstname: params.firstname,
-      lastname: params.lastname,
-      username: params.username,
-      email: params.email,
-      password: req.hash(params.password)    
-    }).exec(function (err, user) {
-      if(err)return res.negotiate(err);
-      
-      //login user with supplied password - nested as User.create is asynchronous
-      req.login(params, function (err){
+    }else{    
+      //TODO: send email verification and verify user before create
+
+      //create user with hash password, we use the given password to login
+      User.create({
+        firstname: params.firstname,
+        lastname: params.lastname,
+        username: params.username,
+        email: params.email,
+        password: req.hash(params.password)    
+      }).exec(function (err, user) {
         if(err)return res.negotiate(err);
-        return res.view('user/account',{user: user});
-       });
-    });
+
+        //login user with supplied password - nested as User.create is asynchronous
+        req.login(params, function (err){
+          if(err)return res.negotiate(err);
+          req.isAuthenticated();
+          return res.view('user/account',{user: user});
+         });
+      });
+    }
     
   },
   
