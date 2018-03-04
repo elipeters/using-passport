@@ -234,19 +234,6 @@ function _extendReq(req) {
     var salt = bcrypt.genSaltSync();
     return bcrypt.hashSync(value, salt);
   };
-   
-  /**
-   * check db for email
-   *
-   * @return {String}
-   * @api public
-   */
-  req.exists = function(email){
-    User.findOne({email: email}).exec(function(err,user){
-      if(err) return false;
-      return true;
-    });
-  };
   
   return req;
 }
