@@ -12,8 +12,10 @@ This tutorial takes advantage of a quick passport hook I put together to elimina
 
 ## Step 1: Install the passport hook
 
-TODO: ...
-
+Install older version of Passport, Passport-Local and Bcrypt-nodejs.
+```shell
+$ npm install passport@0.2.2 passport-local@1.0.0 bcrypt-nodejs@0.0.3
+```
 ## Step 2: Create `User.js` and `UserController.js`
 
 We'll add a stub `login()`, `logout()`, and `signup()` action while we're at it.
