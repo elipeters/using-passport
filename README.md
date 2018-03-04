@@ -160,7 +160,22 @@ Now that we have a backend with nice-looking routes, and we have our views hooke
 ```html
 <h1>Signup</h1>
 <form action="/signup" method="post">
-
+  <% if(msg.info){ %><p class="p-3 mb-0 text-white bg-info"><%- msg.info %></p><% } %>
+  <% if(msg.error){ %><p class="p-3 mb-0 text-white bg-danger"><%- msg.error %></p><% } %>
+  <% if(msg.success){ %><p class="p-3 mb-0 text-white bg-success"><%- msg.success %></p><% } %>
+  
+  <label for="firstname">Choose a Username</label>
+  <input name="firstname" type="text"/>
+  <br/>
+  
+  <label for="lastname">Choose a Username</label>
+  <input name="lastname" type="text"/>
+  <br/>
+  
+  <label for="email">Choose a Username</label>
+  <input name="email" type="email"/>
+  <br/>
+  
   <label for="username">Choose a Username</label>
   <input name="username" type="text"/>
   <br/>
@@ -179,40 +194,37 @@ Now that we have a backend with nice-looking routes, and we have our views hooke
 
 ```html
 <h1>Edit Details</h1>
-<% if(msg.info){ %><p class="p-3 mb-0 text-white bg-info"><%- msg.info %></p><% } %>
-<% if(msg.error){ %><p class="p-3 mb-0 text-white bg-danger"><%- msg.error %></p><% } %>
-<% if(msg.success){ %><p class="p-3 mb-0 text-white bg-success"><%- msg.success %></p><% } %>
+<form action="/update" method="post">
+  <% if(msg.info){ %><p class="p-3 mb-0 text-white bg-info"><%- msg.info %></p><% } %>
+  <% if(msg.error){ %><p class="p-3 mb-0 text-white bg-danger"><%- msg.error %></p><% } %>
+  <% if(msg.success){ %><p class="p-3 mb-0 text-white bg-success"><%- msg.success %></p><% } %>
+  
+  <label for="firstname">Choose a Username</label>
+  <input name="firstname" type="text" value="<%= user.firstname %>"/>
+  <br/>
+  
+  <label for="lastname">Choose a Username</label>
+  <input name="lastname" type="text" value="<%= user.lastname %>"/>
+  <br/>
+  
+  <label for="email">Choose a Username</label>
+  <input name="email" type="email" value="<%= user.email %>"/>
+  <br/>
+  
+  <label for="username">Choose a Username</label>
+  <input name="username" type="text" value="<%= user.username %>"/>
+  <br/>
 
-<form action="update" method="post">
-<div class="form-group">
-  <label for="firstname">First Name</label>
-  <input name="firstname" class="form-control" required type="text" value="<%= user.firstname %>" />
-  <label for="lastname">Last Name</label>
-  <input name="lastname" class="form-control" required type="text" value="<%= user.lastname %>" />      
-</div>        
-  <div class="form-group">
-    <label for="username">Username</label>
-    <input name="username" type="text" required class="form-control" value="<%= user.username %>" />
-  </div>
-  <div class="form-group">
-    <label for="email">Email</label>
-    <input name="email" class="form-control" required type="email" value="<%= user.email %>" />
-  </div>
-  <div class="form-group">
-    <label for="password" data-toggle="tooltip" data-placement="right" title="Please add your current password to make changes">Current Password</label>
-    <input name="password" type="password" minlength="4" required value="12341234" class="form-control"/>
-    <a href="/forgot">Forgotten your password?</a>
-  </div>
-  <div class="form-group" id="change-password">
-    <a href="#">Click here to change password</a>
-    <div class="collapse">
-      <label for="newpassword">New Password</label>
-      <input name="newpassword" type="password" minlength="8" value="" class="form-control"/>
-    </div>
-  </div>
-  <a class="mb-3 btn btn-danger" href="/">Cancel</a>
-  <input class="mb-3 btn btn-primary" type="submit" autofocus value="Update" />
-</form> 
+  <label for="password">Choose a Password</label>
+  <input name="password" type="password"/>
+  <br/>
+
+  <label for="newpassword">Choose a New Password</label>
+  <input name="newpassword" type="password"/>
+  <br/>
+  
+  <input type="submit"/>
+</form>
 ```
 
 
