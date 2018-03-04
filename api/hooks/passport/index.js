@@ -59,22 +59,26 @@ module.exports = function (sails){
         // Create a passport instance to use
         sails.passport = new Passport();
 
-        // Teach our Passport how to serialize/dehydrate a user object into an id
+        /* Teach our Passport how to serialize/dehydrate a user object into an id
+         * Serializing user happens after creation of user and user is the one stored in db. */
         sails.passport.serializeUser(function(user, done) {
-
-          User.find({username: user.user.username}).exec(function(err,users){
-            if(err)return res.serverError(err);
-            for(var i=0; i < users.length; i++){
-              if(bcrypt.compareSync(user.user.password,users[i].password)){
-                 user = users[i];           
-               }else{
-                 if(i==users.length-1){
-                  return res.badRequest('No Such User Found');
-                 }
-               }
+          
+          User.find({username: user.username}).exec(function(err,users){
+            if(err) done('no match',null);
+            
+            //check to see if users exist
+            if(users.length>0 && users){
+              for(var i=0; i < users.length; i++){
+                if(bcrypt.compareSync(user.password, users[i].password)){
+                  user = users[i];
+                  
+                  //cb to controller
+                  done(null, user);
+                }
+              }
+            }else{
+              done('no match', user);
             }
-            //cb to controller
-            done(null, user);
           });
         });
 
@@ -160,17 +164,16 @@ function _extendReq(req) {
     }
     var session = (options.session === undefined) ? true : options.session;
     
-    //find user against hash password
     req[property] = user;
     if (!session) return done&&done();
     if (!req._passport) { throw new Error('passport.initialize() middleware not in use'); }
     if (typeof done != 'function') { throw new Error('req#login requires a callback function'); }
-
-    req._passport.instance.serializeUser(user, req, function(err, obj) {
+    
+    req._passport.instance.serializeUser(user, req, function(err, obj) {      
       if (err) {
         req[property] = null;
         return done(err);
-      }
+      }      
       req._passport.session.user = obj;
       
       //signed in then callback the done(null, user) of serialize back to the controller
@@ -221,6 +224,29 @@ function _extendReq(req) {
     return !req.isAuthenticated();
   };
   
+  /**
+   * Hash a value as not only used for passwords - may consider hiding emails
+   *
+   * @return {String}
+   * @api public
+   */
+  req.hash = function(value){
+    var salt = bcrypt.genSaltSync();
+    return bcrypt.hashSync(value, salt);
+  };
+   
+  /**
+   * check db for email
+   *
+   * @return {String}
+   * @api public
+   */
+  req.exists = function(email){
+    User.findOne({email: email}).exec(function(err,user){
+      if(err) return false;
+      return true;
+    });
+  };
   
   return req;
 }
