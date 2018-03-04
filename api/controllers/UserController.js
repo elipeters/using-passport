@@ -31,8 +31,7 @@ module.exports = {
     
     //TODO: check if account exists - need email for password recovery
 //      sails.log("testing email :",params.email);
-    if(req.exists(params.email)){
-      sails.log("it's true!!!!"); 
+    if(req.exists(params.email)){ 
       //return to login page with error\
       return res.badRequest('A user with that email already exists.','user/login');
     }else{    
