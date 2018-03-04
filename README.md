@@ -35,10 +35,11 @@ If the user login is successful, we'll redirect to `/`.
 /**
  * `UserController.login()`
  */
-login: function (req, res) {
-  return res.login({
-    successRedirect: '/'
-  });
+login: function (req, res) {           
+    return req.login({user: req.params.all()}, function(err){
+      if(err) return res.notFound(null, 'user/signup');
+      return res.redirect('/');
+    });   
 },
 ```
 
