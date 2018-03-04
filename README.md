@@ -93,28 +93,37 @@ Next, let's set up some friendly URLs as custom routes in our `config/routes.js`
 ```
 module.exports.routes = {
   '/': { view: 'homepage' },
-  'get /login': { view: 'user/login' },
-  'get /signup': { view: 'user/signup' },
-  '/welcome': { view: 'user/welcome' },
+  
+  //user
+  'get /login': {view: 'user/login'},
+  'get /signup': {view: 'user/signup'},
+  
   'post /login': 'UserController.login',
   'post /signup': 'UserController.signup',
-  '/logout': 'UserController.logout'
+  
+  'post /update': 'UserController.update',
+  '/logout': 'UserController.logout',
+  '/welcome': {view: 'user/account'},
+  'get /edit': 'UserController.edit',
+  'get /account': 'UserController.account', 
+  'get /forgot': {view: 'user/recovery'},
+  'post /recovery': 'UserController.recovery', 
 }
 ```
 
 And now since we've mapped everything out, we can disable blueprint routing so that the only URLs exposed in our application are those in our `routes.js` file and the routes created by static middleware serving stuff in our `assets/` directory.
 
-_(Note that is optional- I'm doing it here to be explicit and make it clear that there's no magic going on)_
+~~_(Note that is optional- I'm doing it here to be explicit and make it clear that there's no magic going on)_~~
 
-To disable blueprint routing, change your `config/blueprints.js` file to look like this:
+~~To disable blueprint routing, change your `config/blueprints.js` file to look like this:~~
 
-```js
+~~```js
 module.exports.blueprints = {
   actions: false,
   rest: false,
   shortcuts: false
 };
-```
+```~~
 
 ## Step 9: Make the views talk to the backend
 
@@ -165,11 +174,64 @@ Now that we have a backend with nice-looking routes, and we have our views hooke
 ```
 
 
+
+#### Edit Form
+
+```html
+<h1>Edit Details</h1>
+<% if(msg.info){ %><p class="p-3 mb-0 text-white bg-info"><%- msg.info %></p><% } %>
+<% if(msg.error){ %><p class="p-3 mb-0 text-white bg-danger"><%- msg.error %></p><% } %>
+<% if(msg.success){ %><p class="p-3 mb-0 text-white bg-success"><%- msg.success %></p><% } %>
+
+<form action="update" method="post">
+<div class="form-group">
+  <label for="firstname">First Name</label>
+  <input name="firstname" class="form-control" required type="text" value="<%= user.firstname %>" />
+  <label for="lastname">Last Name</label>
+  <input name="lastname" class="form-control" required type="text" value="<%= user.lastname %>" />      
+</div>        
+  <div class="form-group">
+    <label for="username">Username</label>
+    <input name="username" type="text" required class="form-control" value="<%= user.username %>" />
+  </div>
+  <div class="form-group">
+    <label for="email">Email</label>
+    <input name="email" class="form-control" required type="email" value="<%= user.email %>" />
+  </div>
+  <div class="form-group">
+    <label for="password" data-toggle="tooltip" data-placement="right" title="Please add your current password to make changes">Current Password</label>
+    <input name="password" type="password" minlength="4" required value="12341234" class="form-control"/>
+    <a href="/forgot">Forgotten your password?</a>
+  </div>
+  <div class="form-group" id="change-password">
+    <a href="#">Click here to change password</a>
+    <div class="collapse">
+      <label for="newpassword">New Password</label>
+      <input name="newpassword" type="password" minlength="8" value="" class="form-control"/>
+    </div>
+  </div>
+  <a class="mb-3 btn btn-danger" href="/">Cancel</a>
+  <input class="mb-3 btn btn-primary" type="submit" autofocus value="Update" />
+</form> 
+```
+
+
 #### Welcome Page
 
-This is really just gravy, but as a final step, let's set up a welcome page for newly signed-up users at `user/signup.ejs`. We can really put whatever we want here, but let's just give folks a link to get back to the home page and a link to logout (e.g. `<a href="/logout">Log out</a>`).  See the files at `views/user/*.ejs` in this repo for examples.
+```html
+<h1>Account Details</h1>
+<h5 class="card-title">Hi <%= user.firstname %> <%= user.lastname %>!</h5>
 
+<ul class="list-unstyled">
+  <li>Username: <%= user.username %></li>
+  <li>Email: <%= user.email %></li>    
+</ul>
 
+<a class="btn btn-danger" href="/">Close</a>
+<a class="btn btn-warning" href="/logout">Log out</a>
+<a class="my-3 btn btn-primary" href="/edit">Edit</a>
+<a class="btn btn-primary" href="/">Home</a>
+```
 
 
 
