@@ -36,8 +36,10 @@ module.exports.policies = {
   ***************************************************************************/
   UserController: {
     '*': 'isAuthenticated',
-    login: true,
-    signup: true
+    login: true, // should always be accessible
+    signup: true, 
+    forgot: true,
+    recovery: true
   }
 
 	// RabbitController: {
