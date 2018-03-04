@@ -168,21 +168,19 @@ Next, let's set up some friendly URLs as custom routes in our `config/routes.js`
 module.exports.routes = {
   '/': { view: 'homepage' },
   
-  //user
+  //User
   'get /login': {view: 'user/login'},
-  'get /signup': {view: 'user/signup'},
+  'get /signup': 'UserController.signup',
   
   'post /login': 'UserController.login',
-  'post /signup': 'UserController.signup',
+  'post /signup': 'UserController.create',
   
   'post /update': 'UserController.update',
   '/logout': 'UserController.logout',
   '/welcome': {view: 'user/account'},
   'get /edit': 'UserController.edit',
   'get /account': 'UserController.account', 
-  'get /forgot': {view: 'user/recovery'},
-  'post /recovery': 'UserController.recovery', 
-}
+  'get /forgot': {view: 'user/recovery'}
 ```
 
 And now since we've mapped everything out, we can disable blueprint routing so that the only URLs exposed in our application are those in our `routes.js` file and the routes created by static middleware serving stuff in our `assets/` directory.
