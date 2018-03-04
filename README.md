@@ -216,7 +216,7 @@ Now that we have a backend with nice-looking routes, and we have our views hooke
 ```
 
 
-#### Welcome Page
+#### Account Page
 
 ```html
 <h1>Account Details</h1>
