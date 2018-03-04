@@ -2,9 +2,8 @@
  * Module dependencies
  */
 
-var Passport = require('passport').constructor;
-
-
+var Passport = require('passport').constructor,
+    bcrypt = require('bcrypt-nodejs');
 
 /**
  * Passport  hook
@@ -45,7 +44,7 @@ module.exports = function (sails){
 
         // Look up configured user model
         var UserModel = sails.models[sails.config.passport.userModelIdentity];
-
+        
         if (!UserModel) {
           err = new Error();
           err.code = 'E_HOOK_INITIALIZE';
@@ -62,8 +61,21 @@ module.exports = function (sails){
 
         // Teach our Passport how to serialize/dehydrate a user object into an id
         sails.passport.serializeUser(function(user, done) {
-          console.log('Using primary key', UserModel.primaryKey, 'with record:',user);
-          done(null, user[UserModel.primaryKey]);
+
+          User.find({username: user.user.username}).exec(function(err,users){
+            if(err)return res.serverError(err);
+            for(var i=0; i < users.length; i++){
+              if(bcrypt.compareSync(user.user.password,users[i].password)){
+                 user = users[i];           
+               }else{
+                 if(i==users.length-1){
+                  return res.badRequest('No Such User Found');
+                 }
+               }
+            }
+            //cb to controller
+            done(null, user);
+          });
         });
 
         // Teach our Passport how to deserialize/hydrate an id back into a user object
@@ -133,6 +145,7 @@ function _extendReq(req) {
    * @param {Function} done
    * @api public
    */
+
   req.login =
   req.logIn = function(user, options, done) {
     if (typeof options == 'function') {
@@ -146,7 +159,8 @@ function _extendReq(req) {
       property = req._passport.instance._userProperty || 'user';
     }
     var session = (options.session === undefined) ? true : options.session;
-
+    
+    //find user against hash password
     req[property] = user;
     if (!session) return done&&done();
     if (!req._passport) { throw new Error('passport.initialize() middleware not in use'); }
@@ -158,6 +172,8 @@ function _extendReq(req) {
         return done(err);
       }
       req._passport.session.user = obj;
+      
+      //signed in then callback the done(null, user) of serialize back to the controller
       done();
     });
   };
@@ -204,6 +220,7 @@ function _extendReq(req) {
   req.isUnauthenticated = function() {
     return !req.isAuthenticated();
   };
-
+  
+  
   return req;
 }
