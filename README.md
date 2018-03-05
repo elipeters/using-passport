@@ -35,12 +35,12 @@ If the user login is successful, we'll redirect to `/`.
 /**
  * `UserController.login()`
  */
-login: function (req, res) {           
-    req.login(req.params.all(), function(err){
-      if(err) return res.redirect('back');
-      return res.redirect('/');
-    });   
-},
+  login: function (req, res) {           
+      req.login(req.params.all(), function(err){
+        if(err) return res.view({msg: {type: "danger", body: "Incorrect username or password"}}, 'user/login');
+        return res.redirect('user/account');
+      });   
+  },
 ```
 
 ## Step 5: Logout
@@ -55,96 +55,94 @@ logout: function (req, res) {
 },
 ```
 
-## Step 6: Signup
+## Step 6: Signup & Create
 
 ```js
 /**
  * `UserController.signup()`
  */
-signup: function (req, res) {
-  return res.view('user/signup',{msg: {info: "All fields are required"}});
-},
+  signup: function (req, res) {
+    return res.view('user/signup',{msg: {type: "info", body: "All fields are required"}});
+  },
 
-create: function (req, res) {
-  var params = req.params.all();
-
-  //check if account exists - need email for password recovery
-  User.findOne({email: params.email}).exec(function(err,user){
-    if(user){
-      return res.view('user/signup',{msg: {error: "That email is already in use"}});
-    }else{
-      //create user with hash password, we use the given password to login
-      User.create({
-        firstname: params.firstname,
-        lastname: params.lastname,
-        username: params.username,
-        email: params.email,
-        password: req.hash(params.password)    
-      }).exec(function (err, user) {
-        if(err)return res.negotiate(err);
-
-        //login user with supplied password - nested as User.create is asynchronous
-        req.login(params, function (err){
+  create: function (req, res) {
+    var params = req.params.all();
+    
+    //check if account exists - need email for password recovery
+    User.findOne({email: params.email}).exec(function(err,user){
+      if(user){
+        return res.view('user/signup',{user: params, msg: {type: "danger", body: "That email is already in use"}});
+      }else{
+        //create user with hash password, we use the given password to login
+        User.create({
+          firstname: params.firstname,
+          lastname: params.lastname,
+          username: params.username,
+          email: params.email,
+          password: req.hash(params.password)    
+        }).exec(function (err, user) {
           if(err)return res.negotiate(err);
-          req.isAuthenticated();
-          return res.view('user/account',{user: user});
-        });
-      });
-    }
-  });
 
-}
+          //login user with supplied password - nested as User.create is asynchronous
+          req.login(params, function (err){
+            if(err)return res.negotiate(err);
+            req.isAuthenticated();
+            return res.view('user/account',{user: user});
+          });
+        });
+      }
+    });
+    
+  },
 ```
 
 ## Step 7: Account, Edit and Update
 
 ```
-account: function(req,res){ //TODO:
-  res.view('user/account',{user: req.user});
-},
+  account: function(req,res){ //TODO:
+    res.view('user/account',{user: req.user});
+  },
+  
+  edit: function(req,res){ 
+    res.view('user/edit',{user: req.user, msg: {type: "info", body: "All fields are required"}});
+  },
+  
+  update: function(req,res){ //TODO: hash password
+    var params = req.params.all();    
+    
+    //TODO: hash password in model
+    User.findOne({id: req.user.id}).exec(function(err,user){
+      if(err)return res.serverError(err);
+      
+      var current = params.password,
+          hash = user.password,
+          update = params.newpassword;
+      
+            //check for new password
+      if(update){        
+        //if the new and old passwords are the same update params with update hash
+        if(req.comparePassword(password,hash)){
+          
+          params.password = req.hash(update);
 
-
-edit: function(req,res){ 
-  res.view('user/edit',{user: req.user, msg: {}});
-},
-
-
-update: function(req,res){ //TODO: hash password
-  var params = req.params.all();    
-
-  //TODO: hash password in model
-  User.findOne({id: req.user.id}).exec(function(err,user){
-    if(err)return res.serverError(err);
-
-    var current = params.password,
-        hash = user.password,
-        update = params.newpassword;
-
-          //check for new password
-    if(update){        
-      //if the new and old passwords are the same update params with update hash
-      if(req.comparePassword(password,hash)){
-
-        params.password = req.hash(update);
-
-        //remove newpassword from params before sending
-        delete params.newpassword;  
+          //remove newpassword from params before sending
+          delete params.newpassword;  
+        }
       }
-    }
 
-    //update the new user and return back to the edit page
-    User.update({id:user.id},params).exec(function(err, user){
-      if(err) return res.serverError(err);
-
-      //update req        
-      req.user = user[0];
-
-      //send successful user update
-      res.view('user/edit', {user: user[0],msg:{success:'Your details have been updated'}});
-    });      
-
-  });                                        
-},
+      //update the new user and return back to the edit page
+      User.update({id:user.id},params).exec(function(err, user){
+        if(err) return res.serverError(err);
+        
+        //update req        
+        req.user = user[0];
+        
+        //send successful user update
+        res.view('user/edit', {user: user[0],msg:{type: "success", body:'Your details have been updated'}});
+      });      
+      
+    });                                        
+  },
 ```
 
 #### Now what?
@@ -171,16 +169,17 @@ module.exports.routes = {
   //User
   'get /login': {view: 'user/login'},
   'get /signup': 'UserController.signup',
+  'get /edit': 'UserController.edit',
+  'get /logout': 'UserController.logout',
+  'get /welcome': {view: 'user/account'},
+  'get /account': 'UserController.account', 
+  'get /forgot': {view: 'user/recovery'},
   
   'post /login': 'UserController.login',
   'post /signup': 'UserController.create',
   
   'post /update': 'UserController.update',
-  '/logout': 'UserController.logout',
-  '/welcome': {view: 'user/account'},
-  'get /edit': 'UserController.edit',
-  'get /account': 'UserController.account', 
-  'get /forgot': {view: 'user/recovery'}
+  'post /recovery': 'UserController.recovery', 
 ```
 
 And now since we've mapped everything out, we can disable blueprint routing so that the only URLs exposed in our application are those in our `routes.js` file and the routes created by static middleware serving stuff in our `assets/` directory.
@@ -201,6 +200,7 @@ module.exports.blueprints = {
 
 Now that we have a backend with nice-looking routes, and we have our views hooked up to them, let's set up those HTML forms to communicate with the backend.  As you probably know, this could just as easily be done w/ AJAX or WebSockets/Socket.io (using sails.io.js.)
 
+These forms use two partials to display messages and form content.
 
 #### Login Form
 
@@ -208,6 +208,9 @@ Now that we have a backend with nice-looking routes, and we have our views hooke
 
 ```html
 <h1>Login</h1>
+
+<%- partial('./partials/msg.ejs') %>
+
 <form action="/login" method="post">
 
   <label for="username">Username</label>
@@ -220,7 +223,6 @@ Now that we have a backend with nice-looking routes, and we have our views hooke
 
   <input type="submit"/>
 </form>
-
 ```
 
 
@@ -231,30 +233,15 @@ Now that we have a backend with nice-looking routes, and we have our views hooke
 
 ```html
 <h1>Signup</h1>
-<form action="/signup" method="post">
-  <% if(msg.info){ %><p class="p-3 mb-0 text-white bg-info"><%- msg.info %></p><% } %>
-  <% if(msg.error){ %><p class="p-3 mb-0 text-white bg-danger"><%- msg.error %></p><% } %>
-  <% if(msg.success){ %><p class="p-3 mb-0 text-white bg-success"><%- msg.success %></p><% } %>
-  
-  <label for="firstname">Choose a Username</label>
-  <input name="firstname" type="text"/>
-  <br/>
-  
-  <label for="lastname">Choose a Username</label>
-  <input name="lastname" type="text"/>
-  <br/>
-  
-  <label for="email">Choose a Username</label>
-  <input name="email" type="email"/>
-  <br/>
-  
-  <label for="username">Choose a Username</label>
-  <input name="username" type="text"/>
-  <br/>
 
-  <label for="password">Choose a Password</label>
-  <input name="password" type="password"/>
-  <br/>
+<%- partial('./partials/msg.ejs') %>
+
+<form action="/signup" method="post">
+  
+  <%- partial('./partials/form.ejs') %>
+
+  <p>Already have an account? <br>
+  <a href="/login">Click here to login.</a></p>
 
   <input type="submit"/>
 </form>
@@ -266,36 +253,21 @@ Now that we have a backend with nice-looking routes, and we have our views hooke
 
 ```html
 <h1>Edit Details</h1>
-<form action="/update" method="post">
-  <% if(msg.info){ %><p class="p-3 mb-0 text-white bg-info"><%- msg.info %></p><% } %>
-  <% if(msg.error){ %><p class="p-3 mb-0 text-white bg-danger"><%- msg.error %></p><% } %>
-  <% if(msg.success){ %><p class="p-3 mb-0 text-white bg-success"><%- msg.success %></p><% } %>
-  
-  <label for="firstname">Choose a Username</label>
-  <input name="firstname" type="text" value="<%= user.firstname %>"/>
-  <br/>
-  
-  <label for="lastname">Choose a Username</label>
-  <input name="lastname" type="text" value="<%= user.lastname %>"/>
-  <br/>
-  
-  <label for="email">Choose a Username</label>
-  <input name="email" type="email" value="<%= user.email %>"/>
-  <br/>
-  
-  <label for="username">Choose a Username</label>
-  <input name="username" type="text" value="<%= user.username %>"/>
-  <br/>
 
-  <label for="password">Choose a Password</label>
-  <input name="password" type="password"/>
-  <br/>
+<%- partial('./partials/msg.ejs') %>
 
-  <label for="newpassword">Choose a New Password</label>
-  <input name="newpassword" type="password"/>
-  <br/>
-  
-  <input type="submit"/>
+<form action="update" method="post">
+
+  <%- partial('./partials/form.ejs') %>
+
+  <a href="/forgot">Forgotten your password?</a>
+
+  <label for="newpassword">New Password</label>
+  <input name="newpassword" type="password" minlength="8" value="" class="form-control"/>
+
+  <a class="mb-3 btn btn-danger" href="/">Cancel</a>
+  <input class="mb-3 btn btn-primary" type="submit" autofocus value="Update" />
+
 </form>
 ```
 
@@ -304,17 +276,18 @@ Now that we have a backend with nice-looking routes, and we have our views hooke
 
 ```html
 <h1>Account Details</h1>
-<h5 class="card-title">Hi <%= user.firstname %> <%= user.lastname %>!</h5>
+
+<h5>Hi <%= user.firstname %> <%= user.lastname %>!</h5>
 
 <ul class="list-unstyled">
   <li>Username: <%= user.username %></li>
   <li>Email: <%= user.email %></li>    
 </ul>
 
-<a class="btn btn-danger" href="/">Close</a>
-<a class="btn btn-warning" href="/logout">Log out</a>
-<a class="my-3 btn btn-primary" href="/edit">Edit</a>
-<a class="btn btn-primary" href="/">Home</a>
+<a href="/">Close</a>
+<a href="/logout">Log out</a>
+<a href="/edit">Edit</a>
+<a href="/">Home</a>
 ```
 
 
