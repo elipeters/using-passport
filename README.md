@@ -298,7 +298,7 @@ Create the folder structure api/**hooks**/**passport** and add the file **index.
 
 ## Step 11: Extend local reach.
 
-update **bootstrap.js** in the **config** folder.
+Update **bootstrap.js** in the **config** folder.
 
 ```js
 module.exports.bootstrap = function(cb) {
@@ -307,4 +307,21 @@ module.exports.bootstrap = function(cb) {
   
   cb();
 };
+```
+
+
+## Step 12: Define access.
+
+Define your users access rights to your controllers with **isAuthenticated** for a logged in user. 
+
+```js
+  UserController: {
+    '*': 'isAuthenticated',
+    login: true, // should always be accessible
+    signup: true, 
+    forgot: true,
+    recovery: true,
+    create: true
+  },
+  };
 ```
