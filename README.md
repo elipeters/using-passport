@@ -45,7 +45,7 @@ If the user login is successful, we'll redirect to `/`.
 
 ## Step 5: Logout
 
-```
+```js
 /**
  * `UserController.logout()`
  */
@@ -98,7 +98,7 @@ logout: function (req, res) {
 
 ## Step 7: Account, Edit and Update
 
-```
+```js
   account: function(req,res){ //TODO:
     res.view('user/account',{user: req.user});
   },
