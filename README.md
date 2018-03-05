@@ -323,5 +323,4 @@ Define your users access rights to your controllers with **isAuthenticated** for
     recovery: true,
     create: true
   },
-  };
 ```
