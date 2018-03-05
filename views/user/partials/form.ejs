@@ -1,0 +1,18 @@
+<label for="firstname">First Name</label>
+<input name="firstname" type="text" required value="<% if(typeof user == 'object' && user) { %><%- user.firstname %><% } %>" />
+<br>
+
+<label for="lastname">Last Name</label>
+<input name="lastname" type="text" required value="<% if(typeof user == 'object' && user) { %><%- user.lastname %><% } %>" />      
+<br>
+
+<label for="username">Username</label>
+<input name="username" type="text" required value="<% if(typeof user == 'object' && user) { %><%- user.username %><% } %>" />
+<br>
+
+<label for="email">Email</label>
+<input name="email" type="email" required value="<% if(typeof user == 'object' && user) { %><%- user.email %><% } %>" />
+<br>
+
+<label for="password">Password</label>
+<input name="password" type="password" minlength="8" required/>
