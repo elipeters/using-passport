@@ -105,7 +105,7 @@ module.exports = {
   },
   
   forgot: function(req,res){ //TODO: go to recovery view and add some recovery options
-    res.view('user/recovery');
+    res.view('user/recovery',{msg: {type: "info", body: "We will send an email with a temporary password."}});
   }, 
   
   recovery: function(req,res){ //TODO: POST get email - find user from email in db, setup a temporary password and send email for recovery.
@@ -115,7 +115,7 @@ module.exports = {
 
       //TODO: send recovery email
       
-      res.view('user/recovery',{msg: {type: "success", body: "Email has been sent."}});
+      res.view('user/recovery',{msg: {type: "success", body: "Please wait up to 15 minutes for your email and your temporary password."}});
     });
   },
 };
