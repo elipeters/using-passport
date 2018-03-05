@@ -7,12 +7,12 @@ For many Sails apps, Passport is overkill- it's quite easy to set up local authe
 
 But in scenarios where you're doing authentication across multiple providers, Passport can make sense, and save you a lot of time.
 
-This tutorial takes advantage of a quick passport hook I put together to eliminate some of the more confusing aspects of integration with Sails from user-space.  For an in-depth tutorial on how the hook ended up getting built, check out [ORIGINAL_PREHOOK_WALKTHROUGH.md](https://github.com/sails101/using-passport/blob/master/ORIGINAL_PREHOOK_WALKTHROUGH.md).
+This tutorial uses the database MongoDB which is configured in the **config/connections.js** file and connectection is from the **api/models/User.js** file.
 
 
 ## Step 1: Install the passport hook
 
-Install older version of Passport, Passport-Local and Bcrypt-nodejs.
+Install older version of Passport, Passport-Local and Bcrypt-nodejs. (Please refer to the MongoDB installation guide)
 ```shell
 $ npm install passport@0.2.2 passport-local@1.0.0 bcrypt-nodejs@0.0.3
 ```
