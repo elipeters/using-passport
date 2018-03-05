@@ -10,6 +10,8 @@
  */
 
 module.exports.bootstrap = function(cb) {
-
+  
+  _.extend(sails.hooks.http.app.locals, sails.config.http.locals);
+  
   cb();
 };
