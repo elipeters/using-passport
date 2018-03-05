@@ -291,7 +291,7 @@ These forms use two partials to display messages and form content.
 ```
 
 
-## Step 10: Install the passport hook
+## Step 10: Create the passport hook
 
 Create the folder structure api/**hooks**/**passport** and add the file **index.js**. 
 
