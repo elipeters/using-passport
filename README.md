@@ -296,7 +296,7 @@ These forms use two partials to display messages and form content.
 Create the folder structure api/**hooks**/**passport** and add the file **index.js**. 
 
 
-## Step 11: Create the passport hook
+## Step 11: Extend local reach.
 
 update **bootstrap,js** in the **config** folder.
 
