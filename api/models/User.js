@@ -29,5 +29,5 @@ module.exports = {
       required: true
     }
   },
-  connection: 'Mongodb'
+  connection: 'someMongodbServer'
 };
